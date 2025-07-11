@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+    <title>Login</title>
+</head>
+<body>
+    <main>
+        <h1>coloque suas credencias</h1>
+
+        <form action="cadastro.php">
+            <h2>Login</h2>
+
+        <?php
+            // Mostra uma mensagem de erro se a URL tiver ?erro=1
+            if (isset($_GET['erro']) && $_GET['erro'] == 1) {
+                echo '<p class="error">Usuário ou senha inválidos!</p>';
+            }
+        ?>
+
+        <label for="usuario">Usuário:</label>
+        <input type="text" id="usuario" name="usuario" required>
+
+        <label for="senha">Senha:</label>
+        <input type="password" id="senha" name="senha" required>
+
+        <button type="submit">Entrar</button>
+        </form>
+    </main>
+</body>
+</html>
