@@ -1,59 +1,78 @@
-# -*- coding: utf-8 -*-
 
-# PASSO 1: INSTALAR AS BIBLIOTECAS NECESSÁRIAS
-# Abra o seu terminal e instale o SQLAlchemy e o driver do MySQL.
-# O PyMySQL é recomendado por ser em puro Python e mais fácil de instalar.
-#
-# pip install sqlalchemy
-# pip install PyMySQL
-#
+#necessario para roda o script
+# pip install sqlalchemy pymysql
+# pip install pymysql
 
-from sqlalchemy import create_engine, text
+from sqlalchemy import create_engine, Column, Integer, String,Numeric, DateTime, ForeignKey, func
+from sqlalchemy.orm import declarative_base, sessionmaker
 from sqlalchemy.exc import SQLAlchemyError
+import random
 
-# --- CONFIGURAÇÃO DA CONEXÃO ---
 
-# Estes são os dados do seu banco de dados no XAMPP.
-# Altere o 'DB_NOME' para o nome do banco que você quer conectar.
-DB_DIALETO = "mysql"
-DB_DRIVER = "pymysql"
-DB_USUARIO = "root"
-DB_SENHA = ""  # A senha padrão do XAMPP é vazia
-DB_HOST = "127.0.0.1"
-DB_PORTA = "3306"
-DB_NOME = "bazzary_store"  # <-- MUDE AQUI para o nome do seu banco de dados
 
-# --- PASSO 2: MONTAR A STRING DE CONEXÃO ---
 
-# O SQLAlchemy usa uma URL especial para se conectar.
+
 # O formato é: dialeto+driver://usuario:senha@host:porta/nome_do_banco
-string_de_conexao = f"{DB_DIALETO}+{DB_DRIVER}://{DB_USUARIO}:{DB_SENHA}@{DB_HOST}:{DB_PORTA}/{DB_NOME}"
+#mude o nome  banco que esta no phpmyadmin: no meu caso esta bazzary_store
+engine = create_engine("mysql+pymysql://root:@127.0.0.1:3306/bazzary_store", echo=False)
+Base = declarative_base()
+Sessao =sessionmaker(bind=engine)
+sessao = Sessao()
+class Produto(Base):
+    __tablename__ = 'produtos'
+    id = Column(Integer, primary_key=True)
+    nome = Column(String, nullable=False)
+    imagem = Column(String, nullable=True)
+    preco = Column(Numeric(10,2), nullable=False)
+    descricao = Column(String, nullable=False)
+    estoque = Column(Integer, nullable=False, default=0)
+    created_at = Column(DateTime, default=func.now())
+    user_id = Column(Integer, nullable=False, default=1)
+   
 
-print(f"Tentando conectar ao banco de dados: {DB_NOME}")
+def gerar_dados_aleatorios(): 
+    
+    nome_aleatorio = random.choice([
+        'Camiseta', 'Calça', 'Tênis', 'Boné', 'Mochila', 'Relógio', 'Óculos de Sol', 'Jaqueta', 'Meias', 'Carteira'
+        ])
+    imagem_aleatoria = "produtos/" + random.choice(['img_1.jpg', 'img_2.png', 'img_3.png', 'img_4.png', 'img_5.png'])
+    preco_aleatorio = round(random.uniform(1,200), 2)
+    descricao_aleatoria = random.choice(['Produto de alta qualidade', 'Produto durável e confortável', 'Estilo moderno e elegante', 'Perfeito para todas as ocasiões', 'Design inovador e funcional'])
+    estoque_aleatorio = random.randint(1,500)
+    user_id_aleatorio = random.choice([1, 2, 3])
+    
+    print(f"Id: {user_id_aleatorio} Nome: {nome_aleatorio}, imagem: {imagem_aleatoria} ,  Preço: {preco_aleatorio}, Descrição: {descricao_aleatoria} , Estoque: {estoque_aleatorio}")
+    
+    novo_produto = Produto(
+        nome=nome_aleatorio,
+        imagem = imagem_aleatoria,
+        preco=preco_aleatorio,
+        descricao=descricao_aleatoria,
+        estoque=estoque_aleatorio,
+        user_id=user_id_aleatorio
+    )
+    sessao.add(novo_produto)
+    sessao.commit()
+    
 
-# --- PASSO 3: CRIAR O "MOTOR" E TESTAR A CONEXÃO ---
+    
+
+
+
 
 try:
-    # A função create_engine() cria o objeto principal de conexão.
-    engine = create_engine(string_de_conexao)
-
-    # Vamos tentar fazer uma conexão para verificar se tudo está certo.
     with engine.connect() as connection:
         print("✅ Conexão com o banco de dados do XAMPP estabelecida com sucesso!")
+    Base.metadata.create_all(engine)
+    
+    quantidade = input("Quantos produtos deseja inserir? ")
+    if quantidade.isdigit() and int(quantidade) > 0:
+        for _ in range(int(quantidade)):
+            gerar_dados_aleatorios()
+    else:
+        print("Por favor, insira um número válido maior que zero.")
+    
         
-        # --- PASSO 4 (EXTRA): EXECUTANDO UMA CONSULTA SIMPLES ---
-        print("\nExecutando uma consulta de teste...")
-        
-        # O text() é usado para dizer ao SQLAlchemy que isso é um comando SQL seguro.
-        query = text("SELECT version();") # Pede a versão do MySQL
-        
-        # Executa a consulta
-        result = connection.execute(query)
-        
-        # Pega o primeiro resultado
-        versao_mysql = result.scalar()
-        
-        print(f"Versão do MySQL/MariaDB: {versao_mysql}")
 
 except SQLAlchemyError as e:
     print(f"❌ Erro ao conectar ou executar a consulta: {e}")
