@@ -81,7 +81,7 @@ def gerar_dados_aleatorios():
         'Camiseta', 'Calça', 'Tênis', 'Boné', 'Mochila', 'Relógio', 'Óculos de Sol', 'Jaqueta', 'Meias', 'Carteira'
         ])
     imagem_aleatoria = "produtos/" + random.choice(['img_1.jpg', 'img_2.png', 'img_3.png', 'img_4.png', 'img_5.jpeg'])
-    preco_aleatorio = round(random.uniform(1,200), 2)
+    preco_aleatorio = round(random.uniform(1,4000), 2)
     descricao_aleatoria = random.choice(['Produto de alta qualidade', 'Produto durável e confortável', 'Estilo moderno e elegante', 'Perfeito para todas as ocasiões', 'Design inovador e funcional'])
     estoque_aleatorio = random.randint(1,500)
     user_id_aleatorio = random.choice([1, 2, 3])
